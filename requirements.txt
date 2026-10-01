@@ -1,0 +1,60 @@
+# ============================================================
+# KLARIXA KROADSCONTROL (KST)
+# Dependencias del proyecto
+# WIPO / NNN / NDA — EinsRos Global Cortex Ultd
+# ============================================================
+
+# --- Core Backend ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+
+# --- Base de datos y caché ---
+asyncpg==0.29.0
+sqlalchemy==2.0.35
+alembic==1.13.3
+redis==5.0.8
+psycopg2-binary==2.9.9
+
+# --- Geolocalización ---
+h3==4.1.0
+shapely==2.0.6
+geojson==3.1.0
+
+# --- HTTP y async ---
+httpx==0.27.2
+aiofiles==24.1.0
+websockets==13.1
+
+# --- Inferencia IA (compatible ROCm/HIP) ---
+# NOTA: vLLM y torch se instalan por separado en el droplet AMD
+# con los índices específicos de ROCm. Ver docs/rocm_setup.md
+# vllm==0.6.2
+# torch==2.4.1
+
+# --- Cliente HTTP para APIs de modelos ---
+openai==1.51.2
+anthropic==0.34.2
+
+# --- Seguridad ---
+cryptography==43.0.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# --- Utilidades ---
+python-multipart==0.0.12
+orjson==3.10.7
+tenacity==9.0.0
+loguru==0.7.2
+
+# --- Testing ---
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2
+
+# --- Code quality (dev) ---
+black==24.10.0
+ruff==0.6.9
+mypy==1.11.2
