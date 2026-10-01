@@ -1,0 +1,70 @@
+# ============================================================
+# KLARIXA KROADSCONTROL (KST)
+# Mapeo de modelos a tareas
+# WIPO / NNN / NDA — EinsRos Global Cortex Ultd
+# ============================================================
+
+version: "1.0"
+
+# --- Arquitectura Nonacortex 5-3-1 ---
+arquitectura:
+  sensores: 5
+  selectores: 3
+  arbitro: 1
+
+# --- Mapeo de tareas a modelos ---
+tareas:
+  logica:
+    endpoint: deepseek_logic
+    modelo: "deepseek-ai/deepseek-coder-33b-instruct"
+    puerto: 8002
+    vram_estimada_gb: 22
+    justificacion: "Lógica estructurada, geometría, cálculo de rutas"
+
+  nlp:
+    endpoint: gemma_nlp
+    modelo: "google/gemma-2-27b-it"
+    puerto: 8003
+    vram_estimada_gb: 18
+    justificacion: "Chat en tiempo real, alta tasa de tokens"
+
+  vision:
+    endpoint: qwen_vl
+    modelo: "Qwen/Qwen2-VL-7B-Instruct"
+    puerto: 8004
+    vram_estimada_gb: 10
+    justificacion: "Procesamiento local de imágenes"
+
+  fraude:
+    endpoint: edge_model
+    modelo: "Qwen/Qwen2.5-1.5B-Instruct"
+    puerto: 8005
+    vram_estimada_gb: 2
+    justificacion: "Detección rápida de anomalías, baja latencia"
+
+  eta:
+    endpoint: edge_model
+    modelo: "Qwen/Qwen2.5-1.5B-Instruct"
+    puerto: 8005
+    vram_estimada_gb: 2
+    justificacion: "Estimación de tiempo, cómputo ligero"
+
+  cifrado:
+    endpoint: kshield_local
+    modelo: "local"
+    puerto: null
+    vram_estimada_gb: 0
+    justificacion: "Operación criptográfica local, sin GPU"
+
+# --- Router central ---
+router_central:
+  endpoint: qwen_central
+  modelo: "Qwen/Qwen2.5-32B-Instruct"
+  puerto: 8001
+  vram_estimada_gb: 24
+  justificacion: "Function calling, razonamiento, delegación"
+
+# --- Requisitos totales estimados ---
+requisitos_totales:
+  vram_total_estimada_gb: 78
+  nota: "Estimación de diseño. No medida en hardware real. MI300X tiene 192 GB HBM3."
