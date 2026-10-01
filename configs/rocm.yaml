@@ -1,0 +1,87 @@
+# ============================================================
+# KLARIXA KROADSCONTROL (KST)
+# Configuración de entorno ROCm (AMD)
+# WIPO / NNN / NDA — EinsRos Global Cortex Ultd
+# ============================================================
+
+version: "6.1"
+
+rocm:
+  version: "6.1"
+  hip_version: "6.1.40090"
+  distro: "ubuntu-22.04"
+
+# --- Variables de entorno ---
+environment:
+  HSA_OVERRIDE_GFX_VERSION: "9.0.0"  # Ajustar según GPU
+  HIP_VISIBLE_DEVICES: "0"
+  ROCR_VISIBLE_DEVICES: "0"
+  PYTORCH_ROCM_ARCH: "gfx942"        # MI300X
+  VLLM_USE_ROCM: "1"
+  VLLM_TARGET_DEVICE: "rocm"
+
+# --- Instalación de PyTorch + ROCm ---
+pytorch:
+  version: "2.4.1"
+  install_command: |
+    pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
+      --index-url https://download.pytorch.org/whl/rocm6.1
+
+# --- Instalación de vLLM ---
+vllm:
+  version: "0.6.2"
+  install_command: |
+    pip install vllm==0.6.2
+
+# --- Modelos a servir ---
+serving:
+  - nombre: qwen_central
+    modelo: "Qwen/Qwen2.5-32B-Instruct"
+    puerto: 8001
+    tensor_parallel: 1
+    gpu_memory_utilization: 0.85
+    max_model_len: 8192
+
+  - nombre: deepseek_logic
+    modelo: "deepseek-ai/deepseek-coder-33b-instruct"
+    puerto: 8002
+    tensor_parallel: 1
+    gpu_memory_utilization: 0.85
+    max_model_len: 8192
+
+  - nombre: gemma_nlp
+    modelo: "google/gemma-2-27b-it"
+    puerto: 8003
+    tensor_parallel: 1
+    gpu_memory_utilization: 0.85
+    max_model_len: 8192
+
+  - nombre: qwen_vl
+    modelo: "Qwen/Qwen2-VL-7B-Instruct"
+    puerto: 8004
+    tensor_parallel: 1
+    gpu_memory_utilization: 0.80
+    max_model_len: 4096
+
+  - nombre: edge_model
+    modelo: "Qwen/Qwen2.5-1.5B-Instruct"
+    puerto: 8005
+    tensor_parallel: 1
+    gpu_memory_utilization: 0.50
+    max_model_len: 4096
+
+# --- Comando de arranque por modelo ---
+comando_arranque: |
+  python -m vllm.entrypoints.openai.api_server \
+    --model {modelo} \
+    --port {puerto} \
+    --tensor-parallel-size {tensor_parallel} \
+    --gpu-memory-utilization {gpu_memory_utilization} \
+    --max-model-len {max_model_len} \
+    --device rocm
+
+# --- Nota crítica ---
+nota: |
+  Esta configuración NO ha sido probada en hardware real.
+  Es una especificación de diseño basada en la documentación
+  oficial de ROCm y vLLM. Requiere validación en droplet AMD.
