@@ -1,0 +1,53 @@
+# ============================================================
+# KLARIXA KROADSCONTROL (KST)
+# Docker Compose — Desarrollo local
+# WIPO / NNN / NDA — EinsRos Global Cortex Ultd
+# ============================================================
+
+version: "3.9"
+
+services:
+  # --- API principal ---
+  kst-api:
+    build: .
+    container_name: kst-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - POSTGRES_HOST=kst-postgres
+      - REDIS_HOST=kst-redis
+    depends_on:
+      - kst-postgres
+      - kst-redis
+    volumes:
+      - ./src:/app/src
+    restart: unless-stopped
+
+  # --- PostgreSQL ---
+  kst-postgres:
+    image: postgres:16-alpine
+    container_name: kst-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: kst_user
+      POSTGRES_PASSWORD: kst_password_dev
+      POSTGRES_DB: kroadscontrol
+    volumes:
+      - kst_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # --- Redis ---
+  kst-redis:
+    image: redis:7-alpine
+    container_name: kst-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - kst_redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  kst_pg_data:
+  kst_redis_data:
