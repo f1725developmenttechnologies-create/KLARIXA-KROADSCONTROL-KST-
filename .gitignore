@@ -1,0 +1,85 @@
+# ============================================================
+# KLARIXA KROADSCONTROL (KST)
+# WIPO / NNN / NDA — EinsRos Global Cortex Ultd
+# ============================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Entornos virtuales ---
+venv/
+env/
+ENV/
+.venv/
+.env
+.env.local
+.env.*.local
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# --- Base de datos ---
+*.db
+*.sqlite3
+*.log
+
+# --- Secretos y configuración sensible ---
+secrets/
+*.pem
+*.key
+*.crt
+
+# --- Modelos IA (pesos, checkpoints) ---
+models/
+*.gguf
+*.safetensors
+*.bin
+checkpoints/
+
+# --- Datos ---
+data/
+datasets/
+*.parquet
+*.h5
+
+# --- ROCm/HIP ---
+*.hip
+*.hsaco
+
+# --- KSHIELD (contenido encriptado) ---
+kshield/
+*.kst
+*.klx
