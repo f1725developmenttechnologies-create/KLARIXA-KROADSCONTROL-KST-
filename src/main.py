@@ -12,6 +12,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from loguru import logger
 import sys
 
+from src.api import router as api_router
+from src.models import get_model_client
+from src.nonacortex import get_nonacortex
+from src.payments import get_breb_client
+from src.routing import get_h3_router
+from src.security import get_kshield
+
 
 # ------------------------------------------------------------
 # Configuración
@@ -28,7 +35,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore"
+        extra="ignore",
     )
 
 
@@ -44,27 +51,37 @@ logger.add(
     level="INFO",
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
            "<level>{level: <8}</level> | "
-           "<cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>"
+           "<cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
 )
 
 
 # ------------------------------------------------------------
-# Lifespan (startup / shutdown)
+# Lifespan
 # ------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"Iniciando {settings.app_name} v1.0")
+    logger.info(f"Iniciando {settings.app_name} v0.1.0")
     logger.info(f"Entorno: {settings.app_env}")
-    logger.info("Estado: Sistema en modo pre-construcción")
-    logger.info("Repositorio: klarixa-kroadscontrol")
     logger.info("Protocolo: WIPO / NNN / NDA — EinsRos Global Cortex Ultd")
 
-    # TODO: Inicializar conexión a PostgreSQL
-    # TODO: Inicializar conexión a Redis
-    # TODO: Inicializar cliente Nonacortex (Qwen, DeepSeek, Gemma)
+    # Inicializar componentes
+    await get_model_client().inicializar()
+    await get_breb_client().inicializar()
+    get_h3_router()
+    get_kshield()
+
+    # Inicializar Nonacortex
+    ncx = get_nonacortex()
+    await ncx.inicializar()
+
+    logger.info("Todos los componentes inicializados")
 
     yield
 
+    # Cierre
+    await get_model_client().cerrar()
+    await get_breb_client().cerrar()
+    await ncx.detener()
     logger.info(f"Cerrando {settings.app_name}")
 
 
@@ -98,11 +115,17 @@ app.add_middleware(
 
 
 # ------------------------------------------------------------
+# Routers
+# ------------------------------------------------------------
+app.include_router(api_router)
+
+
+# ------------------------------------------------------------
 # Endpoints base
 # ------------------------------------------------------------
 @app.get("/", tags=["root"])
 async def root():
-    """Endpoint raíz. Verificación de que el sistema está en línea."""
+    """Endpoint raíz."""
     return {
         "app": settings.app_name,
         "version": "0.1.0",
@@ -114,16 +137,17 @@ async def root():
 
 @app.get("/health", tags=["health"])
 async def health(request: Request):
-    """Estado de salud del sistema. Verifica componentes clave."""
+    """Estado del sistema."""
     return {
         "status": "healthy",
         "environment": settings.app_env,
         "components": {
             "api": "ok",
-            "database": "not_connected",      # TODO
-            "redis": "not_connected",          # TODO
-            "nonacortex": "not_initialized",   # TODO
-            "models": "not_loaded",            # TODO
+            "nonacortex": "active" if get_nonacortex().activo else "inactive",
+            "models": await get_model_client().salud(),
+            "breb": "simulado" if get_breb_client().simulado else "conectado",
+            "h3": "ok",
+            "kshield": "ok",
         },
         "client_ip": request.client.host if request.client else None,
     }
@@ -131,7 +155,7 @@ async def health(request: Request):
 
 @app.get("/version", tags=["root"])
 async def version():
-    """Información de versión y titularidad."""
+    """Información de versión."""
     return {
         "app": settings.app_name,
         "version": "0.1.0",
